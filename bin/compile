@@ -38,7 +38,7 @@ cat $BUILD_DIR/debs.txt | while read line; do
 	sha=$(echo $line | awk -F '|' '{print $3}')
 	echo "$name : $url : $sha"
 	ensure $name $url $sha
-	dpkg -x $name.deb $BUILD_DIR/$DPKG/
+	dpkg -i $name.deb $BUILD_DIR/$DPKG/
 done
 
 echo "Writing profile script"
