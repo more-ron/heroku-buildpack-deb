@@ -41,7 +41,7 @@ cat $BUILD_DIR/debs.txt | while read line; do
 	dpkg -x $name.deb $BUILD_DIR/$DPKG/
 done
 
-topic "Writing profile script"
+echo "Writing profile script"
 mkdir -p $BUILD_DIR/.profile.d
 cat <<EOF >$BUILD_DIR/.profile.d/000_dpkg.sh
 export PATH="\$HOME/$DPKG/usr/bin:$PATH"
