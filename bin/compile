@@ -29,28 +29,31 @@ function ensure() {
 	fi
 }
 
+DPKG=.dpkg
+mkdir -p $BUILD_DIR/$DPKG
 
 cat $BUILD_DIR/debs.txt | while read line; do
 	name=$(echo $line | awk -F '|' '{print $1}')
 	url=$(echo $line | awk -F '|' '{print $2}')
 	sha=$(echo $line | awk -F '|' '{print $3}')
 	echo "$name : $url : $sha"
-	EXTRACT_DIR="tmp/debs/${name}"
-	mkdir -p "${EXTRACT_DIR}"
-	cd "${EXTRACT_DIR}"
 	ensure $name $url $sha
-	ar vx $name.deb
-	echo "Unpacking $name.deb"
-	if [ -f "data.tar.xz" ]; then
-		echo "xz archive detected"
-		tar -xJvf data.tar.xz
-		rm data.tar.xz
-	elif [ -f "data.tar.gz" ]; then
-		echo "gz archive detected"
-		tar -xzvf data.tar.gz
-		rm data.tar.gz
-	fi
-	echo "Copying binaries to ${BUILD_DIR}/bin"
-	mkdir -p "${BUILD_DIR}/bin"
-	cp usr/bin/* "${BUILD_DIR}/bin/"
+	dpkg -x $name.deb $BUILD_DIR/$DPKG/
 done
+
+topic "Writing profile script"
+mkdir -p $BUILD_DIR/.profile.d
+cat <<EOF >$BUILD_DIR/.profile.d/000_dpkg.sh
+export PATH="\$HOME/$DPKG/usr/bin:$PATH"
+export LD_LIBRARY_PATH="\$HOME/$DPKG/usr/lib:\$LD_LIBRARY_PATH"
+export LD_LIBRARY_PATH="\$HOME/$DPKG/usr/lib/x86_64-linux-gnu:\$LD_LIBRARY_PATH"
+export LD_LIBRARY_PATH="\$HOME/$DPKG/lib:\$LD_LIBRARY_PATH"
+export LD_LIBRARY_PATH="\$HOME/$DPKG/lib/x86_64-linux-gnu:\$LD_LIBRARY_PATH"
+export LD_LIBRARY_PATH="\$HOME/$DPKG/lib64:\$LD_LIBRARY_PATH"
+export INCLUDE_PATH="\$HOME/$DPKG/usr/include:\$INCLUDE_PATH"
+export CPATH="\$INCLUDE_PATH"
+export CPPPATH="\$INCLUDE_PATH"
+EOF
+
+export HOME=$BUILD_DIR
+sh $HOME/.profile.d/000_dpkg.sh
