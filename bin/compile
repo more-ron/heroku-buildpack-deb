@@ -51,6 +51,6 @@ cat $BUILD_DIR/debs.txt | while read line; do
 		rm data.tar.gz
 	fi
 	echo "Copying binaries to ${BUILD_DIR}/bin"
-	mkdir -p ${BUILD_DIR}/bin
+	mkdir -p "${BUILD_DIR}/bin"
 	cp usr/bin/* "${BUILD_DIR}/bin/"
 done
